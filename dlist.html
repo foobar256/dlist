@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Quest List</title>
+    <title>Dles List</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <style>
         @theme {
@@ -16,83 +21,187 @@
             --color-border: var(--border);
             --color-card: var(--card);
             --color-card-foreground: var(--card-foreground);
+            --color-accent: var(--accent);
+            --color-accent-foreground: var(--accent-foreground);
         }
 
         :root {
-            --background: #ffffff;
-            --foreground: #0f172a;
-            --primary: #3b82f6;
-            --primary-foreground: #ffffff;
-            --muted: #f1f5f9;
-            --muted-foreground: #64748b;
-            --border: #e2e8f0;
-            --card: #ffffff;
-            --card-foreground: #0f172a;
+            --background: 210 40% 98%;
+            --foreground: 222 47% 11%;
+            --primary: 243 75% 59%;
+            --primary-foreground: 210 40% 98%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215 16% 47%;
+            --border: 214 32% 91%;
+            --card: 0 0% 100%;
+            --card-foreground: 222 47% 11%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222 47% 11%;
+
+            --radius-lg: 1rem;
+            --radius-md: 0.75rem;
+            --radius-sm: 0.5rem;
         }
 
         .dark {
-            --background: #020617;
-            --foreground: #f8fafc;
-            --primary: #3b82f6;
-            --primary-foreground: #ffffff;
-            --muted: #1e293b;
-            --muted-foreground: #94a3b8;
-            --border: #1e293b;
-            --card: #0f172a;
-            --card-foreground: #f8fafc;
+            --background: 222 47% 4%;
+            --foreground: 210 40% 98%;
+            --primary: 243 75% 70%;
+            --primary-foreground: 222 47% 11%;
+            --muted: 217 33% 12%;
+            --muted-foreground: 215 20% 65%;
+            --border: 217 33% 18%;
+            --card: 222 47% 6%;
+            --card-foreground: 210 40% 98%;
+            --accent: 217 33% 12%;
+            --accent-foreground: 210 40% 98%;
         }
 
         body {
-            background-color: var(--background);
-            color: var(--foreground);
-            transition: background-color 0.3s, color 0.3s;
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Outfit', sans-serif;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(var(--primary), 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(280, 80%, 50%, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass {
+            background: hsla(var(--card), 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid hsla(var(--border), 0.5);
+        }
+
+        .dark .glass {
+            background: hsla(var(--card), 0.5);
+            border: 1px solid hsla(var(--border), 0.3);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+            border-color: hsla(var(--primary), 0.3);
+        }
+
+        .dark .card-hover:hover {
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, hsl(var(--primary)), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: hsla(var(--muted-foreground), 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: hsla(var(--muted-foreground), 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body class="min-h-screen">
-    <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+    <div id="app" class="container mx-auto px-4 py-12 max-w-5xl">
         <!-- Header -->
-        <header class="flex justify-between items-center mb-8 border-b border-border pb-6">
-            <div>
-                <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                    <span class="text-primary">Daily</span> Quest List
+        <header
+            class="glass rounded-3xl p-8 mb-12 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl border-white/20">
+            <div class="text-center sm:text-left">
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
+                    <span class="text-gradient">Dles</span> List
                 </h1>
-                <p class="text-muted-foreground text-sm mt-1" id="date-display"></p>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-muted transition-colors" title="Toggle Theme">
-                    <span id="sun-icon" class="hidden text-xl">☀️</span>
-                    <span id="moon-icon" class="text-xl">🌙</span>
-                </button>
-                <div class="text-right hidden sm:block">
-                    <div class="text-sm font-medium">Standalone Mode</div>
-                    <div class="text-xs text-muted-foreground">Local Storage Only</div>
+                <div class="flex items-center justify-center sm:justify-start gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                    <p class="text-muted-foreground text-sm font-medium uppercase tracking-widest" id="date-display">
+                    </p>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden md:block">
+                    <div class="text-sm font-bold opacity-80">Standalone Experience</div>
+                    <div class="text-xs text-muted-foreground font-medium">Local Storage Sync • v2.0</div>
+                </div>
+
+                <button id="theme-toggle"
+                    class="group relative p-3 rounded-2xl bg-muted/50 hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20"
+                    title="Toggle Theme">
+                    <span id="sun-icon"
+                        class="hidden text-2xl group-hover:rotate-45 transition-transform duration-500">☀️</span>
+                    <span id="moon-icon"
+                        class="text-2xl group-hover:-rotate-12 transition-transform duration-500">🌙</span>
+                </button>
             </div>
         </header>
 
         <!-- Launcher Section -->
-        <div id="launcher-container" class="space-y-6">
-            <div class="sticky top-0 z-10 bg-background/90 backdrop-blur-md py-4 border-b border-border mb-6">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div id="launcher-container" class="space-y-8">
+            <div class="sticky top-6 z-30 glass rounded-2xl p-4 shadow-lg border-white/10 mb-8 max-w-4xl mx-auto">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
                     <div class="flex flex-wrap items-center gap-2" id="tag-filters">
                         <!-- Tags will be injected here -->
                     </div>
-                    <div class="flex items-center gap-4 shrink-0">
-                        <span class="text-sm text-muted-foreground" id="selection-count">0 selected</span>
-                        <button id="launch-btn" class="bg-primary text-primary-foreground px-6 py-2 rounded-full font-bold shadow-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                            Launch Selected 🚀
+                    <div class="flex items-center gap-6 shrink-0 border-l border-border/50 pl-6 ml-2 sm:ml-0">
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold leading-none">Selected</span>
+                            <span class="text-lg font-black text-primary leading-tight" id="selection-count">0</span>
+                        </div>
+                        <button id="launch-btn"
+                            class="relative overflow-hidden group bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold shadow-[0_8px_20px_-6px_rgba(var(--primary),0.5)] hover:shadow-[0_12px_24px_-6px_rgba(var(--primary),0.6)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-30 disabled:translate-y-0 disabled:shadow-none disabled:cursor-not-allowed">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Launch <span
+                                    class="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">🚀</span>
+                            </span>
+                            <div
+                                class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                            </div>
                         </button>
                     </div>
                 </div>
             </div>
 
             <!-- List Section -->
-            <div class="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                <ul id="game-list" class="divide-y divide-border">
+            <div id="game-list-container">
+                <div id="game-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Games will be injected here -->
-                </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -135,7 +244,7 @@
         function init() {
             loadState();
             checkDailyReset();
-            
+
             // Set initial selected games if empty
             if (state.selectedIds.size === 0) {
                 state.selectedIds = new Set(INITIAL_GAMES.map(g => g.id));
@@ -148,9 +257,9 @@
             updateThemeUI();
             render();
             setupEventListeners();
-            
-            document.getElementById('date-display').textContent = new Date().toLocaleDateString(undefined, { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+
+            document.getElementById('date-display').textContent = new Date().toLocaleDateString(undefined, {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
         }
 
@@ -217,9 +326,12 @@
         function renderTags() {
             const container = document.getElementById('tag-filters');
             const allTags = getAllTags();
-            
+
             container.innerHTML = `
-                <button onclick="toggleAllTags()" class="px-3 py-1 rounded-full text-xs font-medium border border-border bg-muted/50 hover:bg-muted transition-colors">
+                <button onclick="toggleAllTags()" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition-all duration-300 ${state.visibleTags.size === allTags.length
+                    ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                    : 'bg-muted/50 border-border/50 text-muted-foreground hover:bg-muted hover:border-border'
+                }">
                     ${state.visibleTags.size === allTags.length ? 'Deselect All' : 'Select All'}
                 </button>
             `;
@@ -227,10 +339,11 @@
             allTags.forEach(tag => {
                 const isSelected = state.visibleTags.has(tag);
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
-                }`;
-                btn.textContent = tag;
+                btn.className = `px-4 py-1.5 rounded-xl text-xs font-bold border transition-all duration-300 ${isSelected
+                    ? 'bg-primary/10 border-primary/50 text-primary shadow-sm'
+                    : 'bg-muted/30 border-transparent text-muted-foreground/70 hover:bg-muted hover:text-muted-foreground'
+                    }`;
+                btn.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
                 btn.onclick = () => toggleTag(tag);
                 container.appendChild(btn);
             });
@@ -243,7 +356,6 @@
                 if (tags.length === 0) return state.visibleTags.has('Uncategorized') || state.visibleTags.size === 0;
                 return tags.some(t => state.visibleTags.has(t));
             }).sort((a, b) => {
-                // Sort: Selected first, then Played last, then Alphabetical
                 const aSel = state.selectedIds.has(a.id);
                 const bSel = state.selectedIds.has(b.id);
                 if (aSel !== bSel) return aSel ? -1 : 1;
@@ -256,43 +368,62 @@
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<li class="p-8 text-center text-muted-foreground">No games match the filters.</li>`;
+                container.innerHTML = `<div class="col-span-full p-12 text-center glass rounded-3xl"><p class="text-muted-foreground font-medium">No games match the selected filters.</p></div>`;
                 return;
             }
 
             container.innerHTML = '';
-            filtered.forEach(game => {
+            filtered.forEach((game, index) => {
                 const isPlayed = state.playedIds.has(game.id);
                 const isSelected = state.selectedIds.has(game.id);
-                const li = document.createElement('li');
-                li.className = `flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors ${isPlayed ? 'opacity-50' : ''}`;
-                
-                li.innerHTML = `
-                    <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection(${game.id})" 
-                        class="w-5 h-5 cursor-pointer rounded border-border text-primary focus:ring-primary">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" 
-                                class="font-medium truncate hover:text-primary transition-colors ${isPlayed ? 'line-through' : ''}">
-                                ${game.name}
-                            </a>
-                            <span class="text-[10px] text-muted-foreground uppercase tracking-wider hidden sm:inline">${new URL(game.url).hostname}</span>
+                const div = document.createElement('div');
+                div.className = `glass rounded-3xl p-6 card-hover flex flex-col gap-4 relative overflow-hidden group ${isPlayed ? 'opacity-60 saturate-50' : ''}`;
+                div.style.animation = `fadeInUp 0.5s ease-out forwards ${index * 0.05}s`;
+                div.style.opacity = '0';
+
+                // Get initials
+                const initials = game.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const hostname = new URL(game.url).hostname.replace('www.', '');
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500">
+                                ${initials}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-xl leading-tight truncate group-hover:text-primary transition-colors">
+                                    <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="${isPlayed ? 'line-through decoration-primary decoration-2' : ''}">
+                                        ${game.name}
+                                    </a>
+                                </h3>
+                                <p class="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 truncate">${hostname}</p>
+                            </div>
                         </div>
-                        <div class="flex flex-wrap gap-1 mt-1">
-                            ${getGameTags(game).map(t => `<span class="px-1.5 py-0.5 rounded bg-muted text-[9px] uppercase tracking-tighter text-muted-foreground">${t}</span>`).join('')}
-                        </div>
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection(${game.id})" 
+                            class="w-6 h-6 cursor-pointer rounded-lg border-2 border-border text-primary focus:ring-primary/20 focus:ring-offset-0 transition-all">
                     </div>
-                    <button onclick="togglePlayed(${game.id})" class="p-2 rounded-full hover:bg-muted transition-colors" title="${isPlayed ? 'Mark as unplayed' : 'Mark as played'}">
-                        ${isPlayed ? '✅' : '⭕'}
-                    </button>
-                    <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="p-2 text-muted-foreground hover:text-primary">↗</a>
+                    
+                    <div class="flex flex-wrap gap-1.5 mt-auto">
+                        ${getGameTags(game).map(t => `<span class="px-2 py-0.5 rounded-lg bg-muted text-[9px] font-black uppercase tracking-widest text-muted-foreground/80 border border-transparent group-hover:border-border/50 transition-colors">${t}</span>`).join('')}
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 mt-2 border-t border-border/30">
+                        <button onclick="togglePlayed(${game.id})" class="flex items-center gap-2 text-xs font-bold transition-all ${isPlayed ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}">
+                            <span class="text-lg">${isPlayed ? '✦' : '✧'}</span>
+                            ${isPlayed ? 'Done for today' : 'Mark as done'}
+                        </button>
+                        <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="p-2 -mr-2 text-muted-foreground hover:text-primary transition-all group-hover:translate-x-1 group-hover:-translate-y-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                        </a>
+                    </div>
                 `;
-                container.appendChild(li);
+                container.appendChild(div);
             });
         }
 
         function updateStats() {
-            document.getElementById('selection-count').textContent = `${state.selectedIds.size} selected`;
+            document.getElementById('selection-count').textContent = state.selectedIds.size;
             document.getElementById('launch-btn').disabled = state.selectedIds.size === 0;
         }
 
@@ -323,7 +454,7 @@
                     alert("All selected games are already marked as played!");
                     return;
                 }
-                
+
                 toLaunch.forEach(g => {
                     window.open(g.url, '_blank');
                     state.playedIds.add(g.id);
@@ -370,4 +501,5 @@
         init();
     </script>
 </body>
+
 </html>
