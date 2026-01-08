@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Quest List</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        @theme {
+            --color-primary: var(--primary);
+            --color-primary-foreground: var(--primary-foreground);
+            --color-background: var(--background);
+            --color-foreground: var(--foreground);
+            --color-muted: var(--muted);
+            --color-muted-foreground: var(--muted-foreground);
+            --color-border: var(--border);
+            --color-card: var(--card);
+            --color-card-foreground: var(--card-foreground);
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #0f172a;
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --border: #e2e8f0;
+            --card: #ffffff;
+            --card-foreground: #0f172a;
+        }
+
+        .dark {
+            --background: #020617;
+            --foreground: #f8fafc;
+            --primary: #3b82f6;
+            --primary-foreground: #ffffff;
+            --muted: #1e293b;
+            --muted-foreground: #94a3b8;
+            --border: #1e293b;
+            --card: #0f172a;
+            --card-foreground: #f8fafc;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s, color 0.3s;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 border-b border-border pb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                    <span class="text-primary">Daily</span> Quest List
+                </h1>
+                <p class="text-muted-foreground text-sm mt-1" id="date-display"></p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-muted transition-colors" title="Toggle Theme">
+                    <span id="sun-icon" class="hidden text-xl">☀️</span>
+                    <span id="moon-icon" class="text-xl">🌙</span>
+                </button>
+                <div class="text-right hidden sm:block">
+                    <div class="text-sm font-medium">Standalone Mode</div>
+                    <div class="text-xs text-muted-foreground">Local Storage Only</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Launcher Section -->
+        <div id="launcher-container" class="space-y-6">
+            <div class="sticky top-0 z-10 bg-background/90 backdrop-blur-md py-4 border-b border-border mb-6">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-2" id="tag-filters">
+                        <!-- Tags will be injected here -->
+                    </div>
+                    <div class="flex items-center gap-4 shrink-0">
+                        <span class="text-sm text-muted-foreground" id="selection-count">0 selected</span>
+                        <button id="launch-btn" class="bg-primary text-primary-foreground px-6 py-2 rounded-full font-bold shadow-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                            Launch Selected 🚀
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Section -->
+            <div class="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                <ul id="game-list" class="divide-y divide-border">
+                    <!-- Games will be injected here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const INITIAL_GAMES = [
+            { id: 1, name: "Foodguessr", url: "https://www.foodguessr.com/", category: "food, geography" },
+            { id: 2, name: "Globle", url: "https://globle-game.com/", category: "geography" },
+            { id: 3, name: "Worldle", url: "https://worldle.teuteuf.fr/", category: "geography, map" },
+            { id: 4, name: "Travle", url: "https://travle.earth/", category: "geography, pathing" },
+            { id: 5, name: "Flagle", url: "https://flagle.io/", category: "flags, geography" },
+            { id: 6, name: "Gamedle", url: "https://www.gamedle.wtf/", category: "video games" },
+            { id: 7, name: "NYT Connections", url: "https://www.nytimes.com/games/connections", category: "words, logic" },
+            { id: 8, name: "NYT Wordle", url: "https://www.nytimes.com/games/wordle/", category: "words" },
+            { id: 9, name: "Contexto", url: "https://contexto.me/", category: "words, semantics" },
+            { id: 10, name: "Chronophoto", url: "https://www.chronophoto.app/daily.html", category: "history, photography" },
+            { id: 11, name: "Timeguessr", url: "https://timeguessr.com/", category: "geography, history, photography" },
+            { id: 12, name: "Wikitrivia", url: "https://wikitrivia.tomjwatson.com/", category: "history, timeline" },
+            { id: 13, name: "Bandle", url: "https://bandle.app/", category: "music, intro" },
+            { id: 14, name: "Wheretaken", url: "https://wheretaken.teuteuf.fr/", category: "geography, photography" },
+            { id: 15, name: "Metazooa", url: "https://metazooa.com/", category: "animals, biology" },
+            { id: 16, name: "Factle", url: "https://factle.app/", category: "trivia, rankings" },
+            { id: 17, name: "Guessthe.game", url: "https://guessthe.game/", category: "video games, screenshots" },
+            { id: 18, name: "Guessthelogo", url: "https://guessthelogo.wtf/", category: "" }
+        ];
+
+        let state = {
+            games: [],
+            playedIds: new Set(),
+            selectedIds: new Set(),
+            visibleTags: new Set(),
+            isDark: false
+        };
+
+        // --- CONSTANTS ---
+        const STORAGE_KEY = 'dlist-standalone-v1';
+
+        // --- CORE LOGIC ---
+
+        function init() {
+            loadState();
+            checkDailyReset();
+            
+            // Set initial selected games if empty
+            if (state.selectedIds.size === 0) {
+                state.selectedIds = new Set(INITIAL_GAMES.map(g => g.id));
+            }
+
+            // Set initial visible tags
+            const allTags = getAllTags();
+            state.visibleTags = new Set(allTags.filter(t => t !== 'broken' && t !== 'disliked'));
+
+            updateThemeUI();
+            render();
+            setupEventListeners();
+            
+            document.getElementById('date-display').textContent = new Date().toLocaleDateString(undefined, { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.playedIds = new Set(parsed.playedIds || []);
+                    state.selectedIds = new Set(parsed.selectedIds || []);
+                    state.isDark = parsed.isDark || false;
+                } catch (e) {
+                    console.error("Failed to load state", e);
+                }
+            } else {
+                state.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+        }
+
+        function saveState() {
+            const data = {
+                playedIds: Array.from(state.playedIds),
+                selectedIds: Array.from(state.selectedIds),
+                isDark: state.isDark,
+                lastResetDate: new Date().toDateString()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function checkDailyReset() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                const today = new Date().toDateString();
+                if (parsed.lastResetDate && parsed.lastResetDate !== today) {
+                    state.playedIds = new Set();
+                    saveState();
+                }
+            }
+        }
+
+        function getAllTags() {
+            const tags = new Set();
+            INITIAL_GAMES.forEach(g => {
+                const gTags = getGameTags(g);
+                gTags.forEach(t => tags.add(t));
+            });
+            return Array.from(tags).sort();
+        }
+
+        function getGameTags(game) {
+            if (!game.category) return [];
+            return game.category.split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        // --- UI RENDERING ---
+
+        function render() {
+            renderTags();
+            renderGames();
+            updateStats();
+        }
+
+        function renderTags() {
+            const container = document.getElementById('tag-filters');
+            const allTags = getAllTags();
+            
+            container.innerHTML = `
+                <button onclick="toggleAllTags()" class="px-3 py-1 rounded-full text-xs font-medium border border-border bg-muted/50 hover:bg-muted transition-colors">
+                    ${state.visibleTags.size === allTags.length ? 'Deselect All' : 'Select All'}
+                </button>
+            `;
+
+            allTags.forEach(tag => {
+                const isSelected = state.visibleTags.has(tag);
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-muted/50 border-border text-muted-foreground hover:bg-muted'
+                }`;
+                btn.textContent = tag;
+                btn.onclick = () => toggleTag(tag);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderGames() {
+            const container = document.getElementById('game-list');
+            const filtered = INITIAL_GAMES.filter(g => {
+                const tags = getGameTags(g);
+                if (tags.length === 0) return state.visibleTags.has('Uncategorized') || state.visibleTags.size === 0;
+                return tags.some(t => state.visibleTags.has(t));
+            }).sort((a, b) => {
+                // Sort: Selected first, then Played last, then Alphabetical
+                const aSel = state.selectedIds.has(a.id);
+                const bSel = state.selectedIds.has(b.id);
+                if (aSel !== bSel) return aSel ? -1 : 1;
+
+                const aPlay = state.playedIds.has(a.id);
+                const bPlay = state.playedIds.has(b.id);
+                if (aPlay !== bPlay) return aPlay ? 1 : -1;
+
+                return a.name.localeCompare(b.name);
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<li class="p-8 text-center text-muted-foreground">No games match the filters.</li>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            filtered.forEach(game => {
+                const isPlayed = state.playedIds.has(game.id);
+                const isSelected = state.selectedIds.has(game.id);
+                const li = document.createElement('li');
+                li.className = `flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors ${isPlayed ? 'opacity-50' : ''}`;
+                
+                li.innerHTML = `
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection(${game.id})" 
+                        class="w-5 h-5 cursor-pointer rounded border-border text-primary focus:ring-primary">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" 
+                                class="font-medium truncate hover:text-primary transition-colors ${isPlayed ? 'line-through' : ''}">
+                                ${game.name}
+                            </a>
+                            <span class="text-[10px] text-muted-foreground uppercase tracking-wider hidden sm:inline">${new URL(game.url).hostname}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                            ${getGameTags(game).map(t => `<span class="px-1.5 py-0.5 rounded bg-muted text-[9px] uppercase tracking-tighter text-muted-foreground">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <button onclick="togglePlayed(${game.id})" class="p-2 rounded-full hover:bg-muted transition-colors" title="${isPlayed ? 'Mark as unplayed' : 'Mark as played'}">
+                        ${isPlayed ? '✅' : '⭕'}
+                    </button>
+                    <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="p-2 text-muted-foreground hover:text-primary">↗</a>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('selection-count').textContent = `${state.selectedIds.size} selected`;
+            document.getElementById('launch-btn').disabled = state.selectedIds.size === 0;
+        }
+
+        function updateThemeUI() {
+            if (state.isDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('sun-icon').classList.remove('hidden');
+                document.getElementById('moon-icon').classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('sun-icon').classList.add('hidden');
+                document.getElementById('moon-icon').classList.remove('hidden');
+            }
+        }
+
+        // --- EVENTS ---
+
+        function setupEventListeners() {
+            document.getElementById('theme-toggle').onclick = () => {
+                state.isDark = !state.isDark;
+                saveState();
+                updateThemeUI();
+            };
+
+            document.getElementById('launch-btn').onclick = () => {
+                const toLaunch = INITIAL_GAMES.filter(g => state.selectedIds.has(g.id) && !state.playedIds.has(g.id));
+                if (toLaunch.length === 0) {
+                    alert("All selected games are already marked as played!");
+                    return;
+                }
+                
+                toLaunch.forEach(g => {
+                    window.open(g.url, '_blank');
+                    state.playedIds.add(g.id);
+                });
+                saveState();
+                render();
+            };
+        }
+
+        window.toggleSelection = (id) => {
+            if (state.selectedIds.has(id)) state.selectedIds.delete(id);
+            else state.selectedIds.add(id);
+            saveState();
+            render();
+        };
+
+        window.togglePlayed = (id) => {
+            if (state.playedIds.has(id)) state.playedIds.delete(id);
+            else state.playedIds.add(id);
+            saveState();
+            render();
+        };
+
+        window.markAsPlayed = (id) => {
+            state.playedIds.add(id);
+            saveState();
+            render(); // Re-render to show cross-out
+        };
+
+        window.toggleTag = (tag) => {
+            if (state.visibleTags.has(tag)) state.visibleTags.delete(tag);
+            else state.visibleTags.add(tag);
+            render();
+        };
+
+        window.toggleAllTags = () => {
+            const all = getAllTags();
+            if (state.visibleTags.size === all.length) state.visibleTags = new Set();
+            else state.visibleTags = new Set(all);
+            render();
+        };
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
