@@ -154,10 +154,7 @@
             </div>
 
             <div class="flex items-center gap-6">
-                <div class="text-right hidden md:block">
-                    <div class="text-sm font-bold opacity-80">Standalone Experience</div>
-                    <div class="text-xs text-muted-foreground font-medium">Local Storage Sync • v2.0</div>
-                </div>
+
 
                 <button id="theme-toggle"
                     class="group relative p-3 rounded-2xl bg-muted/50 hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20"
@@ -179,15 +176,15 @@
                     </div>
                     <div class="flex items-center gap-4 shrink-0 border-l border-border/50 pl-6 ml-2 sm:ml-0">
                         <div class="flex flex-col">
-                            <span class="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold leading-none">Sort By</span>
-                            <select id="sort-by" onchange="updateSort(this.value)" class="bg-transparent text-sm font-bold text-primary focus:outline-none cursor-pointer">
+
+                            <select id="sort-by" onchange="updateSort(this.value)"
+                                class="bg-transparent text-sm font-bold text-primary focus:outline-none cursor-pointer">
                                 <option value="default">Default</option>
                                 <option value="rating">Rating</option>
                             </select>
                         </div>
                         <div class="flex flex-col">
-                            <span
-                                class="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold leading-none">Selected</span>
+
                             <span class="text-lg font-black text-primary leading-tight" id="selection-count">0</span>
                         </div>
                         <button id="launch-btn"
@@ -232,7 +229,17 @@
             { id: 15, name: "Metazooa", url: "https://metazooa.com/", category: "animals, biology" },
             { id: 16, name: "Factle", url: "https://factle.app/", category: "trivia, rankings" },
             { id: 17, name: "Guessthe.game", url: "https://guessthe.game/", category: "video games, screenshots" },
-            { id: 18, name: "Guessthelogo", url: "https://guessthelogo.wtf/", category: "" }
+            { id: 18, name: "Guessthelogo", url: "https://guessthelogo.wtf/", category: "trivia, logos" },
+            { id: 19, name: "Avi Trivia", url: "https://avi-trivia.netlify.app/", category: "trivia, sorting, stats" },
+            { id: 20, name: "Nerdle", url: "https://nerdlegame.com/", category: "math, numbers" },
+            { id: 21, name: "Quordle", url: "https://www.merriam-webster.com/games/quordle/", category: "words" },
+            { id: 22, name: "Waffle", url: "https://wafflegame.net/", category: "words, logic" },
+            { id: 23, name: "Semantle", url: "https://semantle.com/", category: "words, semantics" },
+            { id: 24, name: "LoLdle", url: "https://loldle.net/", category: "video games, lol" },
+            { id: 25, name: "Squirdle", url: "https://squirdle.fireblend.com/", category: "animals, pokemon" },
+            { id: 26, name: "Framed", url: "https://framed.wtf/", category: "movies, screenshots" },
+            { id: 27, name: "Cine2nerdle", url: "https://www.cine2nerdle.com/", category: "movies, connections" },
+            { id: 28, name: "Moviedle", url: "https://www.moviedle.app/", category: "movies, video" }
         ];
 
         let state = {
@@ -430,18 +437,16 @@
 
                     <div class="flex items-center justify-between pt-4 mt-2 border-t border-border/30">
                         <div class="flex flex-col gap-1">
-                            <span class="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold leading-none">Rating</span>
+
                             <select onchange="setRating(${game.id}, this.value)" class="bg-transparent text-xs font-bold text-primary focus:outline-none cursor-pointer">
                                 <option value="0" ${currentRating == 0 ? 'selected' : ''}>-</option>
                                 ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(r => `<option value="${r}" ${currentRating == r ? 'selected' : ''}>${r}/10</option>`).join('')}
                             </select>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button onclick="togglePlayed(${game.id})" class="flex items-center gap-2 text-xs font-bold transition-all ${isPlayed ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}">
+                            <button onclick="togglePlayed(${game.id})" class="flex items-center gap-2 transition-all ${isPlayed ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}">
                                 <span class="text-lg">${isPlayed ? '✦' : '✧'}</span>
-                                ${isPlayed ? 'Done' : 'Mark'}
-                            </button>
-                            <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="p-2 -mr-2 text-muted-foreground hover:text-primary transition-all group-hover:translate-x-1 group-hover:-translate-y-1">
+                            </button>                            <a href="${game.url}" target="_blank" onclick="markAsPlayed(${game.id})" class="p-2 -mr-2 text-muted-foreground hover:text-primary transition-all group-hover:translate-x-1 group-hover:-translate-y-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                             </a>
                         </div>
@@ -482,7 +487,7 @@
 
             document.getElementById('launch-btn').onclick = () => {
                 let toLaunch = INITIAL_GAMES.filter(g => state.selectedIds.has(g.id) && !state.playedIds.has(g.id));
-                
+
                 if (toLaunch.length === 0) {
                     if (confirm("All selected games are already marked as played. Launch them anyway?")) {
                         toLaunch = INITIAL_GAMES.filter(g => state.selectedIds.has(g.id));
